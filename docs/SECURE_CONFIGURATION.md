@@ -90,6 +90,26 @@ real `.env`, API key, private key, or database URL. Secret scanning
 - **Risk of weakening:** a leaked server secret key allows deploying/controlling
   contracts on your behalf.
 
+## Logging and redaction
+
+Secret configuration values (`API_KEYS`, `WEBHOOK_SECRET`, `SECRET_KEY`,
+`SERVER_PRIVATE_KEY`, `REDIS_URL`, and similar) must never appear in application
+logs — including failure paths and debug dumps.
+
+The backend logger (`backend/src/logger.ts`) enforces this:
+
+- `redactSensitive` / `redactSecretConfig` strip credentials, authorization
+  headers, wallet secrets, and secret-configuration fields from structured log
+  payloads.
+- `summarizeSecretConfig` exposes only presence flags (e.g.
+  `API_KEYS_configured: true`) for startup diagnostics — never the raw values.
+- Pino `redact.paths` also censors common secret field names if they reach the
+  transport layer.
+
+When diagnosing configuration issues, log whether a secret is configured and
+non-secret settings (port, `NODE_ENV`, `CONTRACT_ID`), not the secret material
+itself.
+
 ## Rotation
 
 When rotating any secret, update the value in the platform secret manager,
