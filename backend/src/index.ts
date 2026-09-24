@@ -84,7 +84,7 @@ import {
   normalizeQueryValue,
 } from './validation/schemas';
 import { generateOpenApiDocument } from './openapi';
-import { logError, logInfo, logger } from './logger';
+import { logError, logInfo, logger, summarizeSecretConfig } from './logger';
 import {
   buildCampaignCacheKey,
   getCampaignCacheEntry,
@@ -1192,6 +1192,8 @@ function printStartupBanner(): void {
       port: config.port,
       environment: nodeEnv,
       databasePath: dbPath,
+      // Presence-only; values never logged (see redactSecretConfig / issue #955)
+      ...summarizeSecretConfig(),
     },
     config.logLevel,
   );
